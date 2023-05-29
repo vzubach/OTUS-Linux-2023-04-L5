@@ -1,0 +1,59 @@
+1.
+[root@zfs ~]# zpool list
+NAME    SIZE  ALLOC   FREE  CKPOINT  EXPANDSZ   FRAG    CAP  DEDUP    HEALTH  ALTROOT
+otus1   480M  21.6M   458M        -         -     0%     4%  1.00x    ONLINE  -
+otus2   480M  17.7M   462M        -         -     0%     3%  1.00x    ONLINE  -
+otus3   480M  10.8M   469M        -         -     0%     2%  1.00x    ONLINE  -
+otus4   480M  39.2M   441M        -         -     0%     8%  1.00x    ONLINE  -
+
+[root@zfs ~]# ls -l /otus* 
+/otus1:
+total 22048
+-rw-r--r--. 1 root root 40931771 May  2 08:18 pg2600.converter.log
+/otus2:
+total 17985
+-rw-r--r--. 1 root root 40931771 May  2 08:18 pg2600.converter.log
+/otus3:
+total 10955
+-rw-r--r--. 1 root root 40931771 May  2 08:18 pg2600.converter.log
+/otus4:
+total 40000
+-rw-r--r--. 1 root root 40931771 May  2 08:18 pg2600.converter.log
+[root@zfs ~]# 
+
+zfs get all | grep compress |grep -v ref
+otus1  compressratio         1.81x                  -
+otus1  compression           lzjb                   local
+otus2  compressratio         2.22x                  -
+otus2  compression           lz4                    local
+otus3  compressratio         3.65x                  -
+otus3  compression           gzip-9                 local
+otus4  compressratio         1.00x                  -
+otus4  compression           zle                    local
+[root@zfs ~]# 
+
+Том otus3 с алгоритмом gzip-9 обладает наилучшей компрессией.
+
+2. Команда для импорта пула: sudo zpool import -d zpoolexport/ otus
+ 
+Посмотреть:
+- размер хранилища:		zfs get all otus |grep available     
+	otus  available             350M	
+- значение recordsize:	zfs get all otus |grep recordsize
+	otus  recordsize            128K          
+- используемое сжатие:	zfs get all otus |grep compression
+	otus  compression           zle                    
+- используемая чексумма: zfs get all otus |grep check      
+	otus  checksum              sha256
+
+3. Восстановление из бэкапа выполняется командой: sudo zfs receive otus/test@today < otus_task2.file
+
+	- ищем секретный файл: find /otus/test -name secret* 
+		/otus/test/task1/file_mess/secret_message
+	- смотрим что внутри: cat /otus/test/task1/file_mess/secret_message
+		https://github.com/sindresorhus/awesome
+
+	
+
+
+
